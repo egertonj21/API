@@ -8,6 +8,11 @@ exports.getUserHashedPassword = async (req, res) => {
     try {
         const sql = 'SELECT password FROM user WHERE email = ?';
         const [user] = await query(sql, [email]);
+
+        if (!user) {
+            return res.status(401).json({ message: 'User not found' });
+        }
+
         const hashedPassword = user.password;
         const match = await bcrypt.compare(password, hashedPassword);
         if (match) {
@@ -20,6 +25,7 @@ exports.getUserHashedPassword = async (req, res) => {
         res.status(500).json({ message: 'An error occurred during login' });
     }
 };
+
 
 // Controller function to insert a new user
 exports.postInsertUser = async (req, res) => {
@@ -133,5 +139,69 @@ exports.postUpdateStatus = async (req, res) => {
         res.status(500).json({ message: 'An error occurred while updating the item status' });
     }
 };
+
+// Controller function to check if a user's email exists in the table
+exports.getUserEmail = async (req, res) => {
+    // Assuming the email is passed as a query parameter, e.g., /checkUser?email=user@example.com
+    const { email } = req.query;
+    
+    try {
+        // SQL query to check if the email exists in the user table
+        const sql = 'SELECT email FROM user WHERE email = ?';
+        
+        // Execute the query
+        const result = await query(sql, [email]);
+        
+        // Check if any rows are returned
+        if (result.length > 0) {
+            // Email exists in the table
+            res.status(200).json({ message: 'Email exists', exists: true });
+        } else {
+            // Email does not exist in the table
+            res.status(404).json({ message: 'Email does not exist', exists: false });
+        }
+    } catch (error) {
+        // Log the error and send a server error response
+        console.error("Error:", error);
+        res.status(500).json({ message: 'An error occurred while checking the email' });
+    }
+};
+
+// Controller function to get items for a user based on their email
+exports.getItemForUser = async (req, res) => {
+    // Assuming the email is passed as a query parameter, e.g., /user?email=user@example.com
+    const { email } = req.query;
+    
+    if (!email) {
+        return res.status(400).json({ message: 'Email parameter is required' });
+    }
+
+    try {
+        // SQL query to get items associated with the user's email
+        // Adjust the query based on your database schema and relationship between user and item tables
+        const sql = `
+            SELECT i.* FROM item i
+            JOIN user u ON i.user_id = u.id
+            WHERE u.email = ?
+        `;
+        
+        // Execute the query
+        const items = await query(sql, [email]);
+        
+        // Check if any items are returned
+        if (items.length > 0) {
+            // Items found for the user
+            res.status(200).json({ message: 'Items found for the user', items });
+        } else {
+            // No items found for the user
+            res.status(404).json({ message: 'No items found for this user' });
+        }
+    } catch (error) {
+        // Log the error and send a server error response
+        console.error("Error:", error);
+        res.status(500).json({ message: 'An error occurred while fetching items for the user' });
+    }
+};
+
 
 
