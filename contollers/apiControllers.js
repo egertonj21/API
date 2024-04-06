@@ -142,7 +142,7 @@ exports.postUpdateStatus = async (req, res) => {
 
 // Controller function to check if a user's email exists in the table
 exports.getUserEmail = async (req, res) => {
-    // Assuming the email is passed as a query parameter, e.g., /checkUser?email=user@example.com
+    
     const { email } = req.query;
     
     try {
@@ -169,7 +169,7 @@ exports.getUserEmail = async (req, res) => {
 
 // Controller function to get items for a user based on their email
 exports.getItemForUser = async (req, res) => {
-    // Assuming the email is passed as a query parameter, e.g., /user?email=user@example.com
+    
     const { email } = req.query;
     
     if (!email) {
@@ -178,7 +178,7 @@ exports.getItemForUser = async (req, res) => {
 
     try {
         // SQL query to get items associated with the user's email
-        // Adjust the query based on your database schema and relationship between user and item tables
+        
         const sql = `
             SELECT i.* FROM item i
             JOIN user u ON i.user_id = u.id
